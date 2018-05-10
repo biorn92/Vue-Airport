@@ -1,0 +1,26 @@
+body {
+  background-image: url("../image/aeroporto.jpg");
+  background-size:cover;
+}
+
+
+.UserCompany{
+  margin-top: 180px;
+  display: inline-block;
+}
+
+.utenteloggato h4{
+  margin-top: 40px;
+}
+
+.nuovoVolo{
+  margin-top: 10px;
+}
+
+.singleCompany{
+  margin-left: 50px;
+}
+
+.ricercavolo{
+  margin-left: 50px;
+}

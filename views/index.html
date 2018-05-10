@@ -1,0 +1,132 @@
+    <!DOCTYPE html>
+    <html lang="en" dir="ltr">
+      <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="../public/css/style.css">
+        <link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap.min.css"></link>
+        <script src="../bower_components/jquery/dist/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+        <script src="../bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+        <title></title>
+      </head>
+
+
+      <body>
+        <div id="app">
+          <div class="row UserCompany">
+            <div class="offset-md-1 signupLogin" v-if='!currentUser && !currentCompany' >
+              <h3>Users</h3>
+              <button @click='status="signup"'>Signup</button>
+              <button @click='status="login"'>Login</button>
+              <br>
+              <input v-if='status=="signup"' v-model='newUser.name' type="text" placeholder="name" /><br>
+              <input v-if='status=="signup"' v-model='newUser.surname' type="text" placeholder="surname" /><br>
+              <input v-if='status=="login" || status=="signup"' v-model='newUser.email' type="email" placeholder="email" /><br>
+              <input v-if='status=="login" || status=="signup"' v-model='newUser.password' type="password" placeholder="password" /><br>
+              <button type="button" @click='status == "signup" ? signup():login()' >{{ status == "signup" ? "Signup":"Login"}}</button>
+              <p v-if='errorMessage'>{{errorMessage}}</p><br>
+            </div>
+
+            <div v-if='currentUser' class="card utenteloggato offset-md-1" style="width: 18rem;">
+              <img class="card-img-top" src="../public/image/users.jpg" alt="Card image cap">
+              <div class="card-body">
+                <h5 class="welcome "><b>Benvenuto {{currentUser.name}}</b></h5>
+                <button @click='logout' class="badge badge-danger" style="margin-top:30px; cursor:pointer">Logout</button>
+                <span class="badge badge-primary" v-if='currentUser.books.length > 0'>{{currentUser.books.length}} Books</span>
+                <h4>Search flight</h4>
+                Departures:<br>
+                <input v-model=this.departures type="text" ><br>
+                Arrivals:<br>
+                <input v-model=this.arrivals type="text"><br>
+                <button class="badge badge-success" @click='searchBook(departures, arrivals)' style="cursor:pointer;">Search</button>
+              </div>
+            </div>
+
+            <div class="offset-md-1" v-if='!currentCompany && !currentUser'  >
+              <h3>Company</h3>
+              <button @click='status="signup"'>Signup</button>
+              <button @click='status="login"'>Login</button>
+              <br>
+              <input v-if='status=="login" || status=="signup"' v-model='newCompany.name' type="text" placeholder="name" /><br>
+              <input v-if='status=="login" || status=="signup"' v-model='newCompany.password' type="password" placeholder="password" /><br>
+              <button type="button" @click='status == "signup" ? signupCompany():loginCompany()' >{{ status == "signup" ? "Signup":"Login"}}</button>
+              <p v-if='errorMessage'>{{errorMessage}}</p><br>
+            </div>
+
+            <div v-if='currentCompany'  class="card offset-md-1" style="width: 18rem;">
+              <div class="card-body">
+                <h5 class="welcome "><b>{{currentCompany.name}}</b></h5>
+                <span class="badge badge-primary" v-if='currentCompany.flights.length > 0'>{{currentCompany.flights.length}} Flights</span><br>
+                <button class="badge badge-success"  data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample" style="margin-top:30px; cursor:pointer;">New flight</button>
+                <button @click='logoutCompany' class="badge badge-danger" style="margin-top:30px; cursor:pointer">Logout</button>
+              </div>
+              <div class="collapse" id="collapseExample">
+                <ul class="list-group list-group-flush">
+                  <li class="list-group-item">
+                    Date:<br>
+                    <input v-model=newFlight.date type="text" ><br>
+                    Departures:<br>
+                    <input v-model=newFlight.departures type="text" ><br>
+                    Arrivals:<br>
+                    <input v-model=newFlight.arrivals type="text"><br>
+                    Price:<br>
+                    <input v-model.number=newFlight.price  type="number" ><br>
+                    <button class="badge badge-success" @click='createFlight' style="cursor:pointer;">Create</button>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div v-if='currentCompany' class="card offset-md-1" style="width: 18rem;">
+              <div class="card-body">
+                <h6>Flights</h6>
+                <ul>
+                  <li v-for='allFlight in allFlights' v-if='currentCompany._id == allFlight.companyName'>
+                  <b>When: </b>{{allFlight.date}} <br> <b>Departures: </b>{{allFlight.departures}}<br> <b>Arrivals: </b>{{allFlight.arrivals}} <br><b>Price: </b>{{allFlight.price}}<br>
+                  <span class="badge badge-primary">{{allFlight.books.length}} Books</span><br>
+                  <button @click='deleteFlight(allFlight._id)'>Delete</button>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div v-if='searchFlight' class="card ricercavolo" style="width: 18rem;">
+              <div class="card-body">
+                <h6>Flights</h6>
+                <ul>
+                  <li>
+                    <b>When: </b>{{searchFlight.date}} <br> <b>Departures: </b>{{searchFlight.departures}}<br> <b>Arrivals: </b>{{searchFlight.arrivals}} <br><b>Price: </b>{{searchFlight.price}}<br>
+                    <button class="badge badge-success" @click='createBook(searchFlight._id)' style="cursor:pointer;">Prenote</button>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div v-if='allBooks' class="card booksutente offset-md-1" style="width: 18rem;">
+              <div class="card-body">
+                <h6>Books</h6>
+                <ul >
+                  <li v-for='allBook in allBooks' v-if='currentUser._id == allBook.owner'>
+                  <b>Seat: </b>{{allBook.seat}}
+                  <button class="badge badge-warning" v-if='currentUser.ceckin == false' @click='doCeckin' style="cursor:pointer;"> Check-In</button>
+                  <span class="badge badge-success" v-if='currentUser.ceckin == true'> Check-In</span><br>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+
+
+
+
+      </body>
+      <script src="../bower_components/vue/dist/vue.min.js"></script>
+      <script src="../bower_components/vue-resource/dist/vue-resource.min.js"></script>
+      <script type="text/javascript" src="../public/js/app.js">
+
+      </script>
+    </html>
